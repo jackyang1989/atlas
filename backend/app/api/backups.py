@@ -48,7 +48,7 @@ async def list_backups(
 ):
     """列出所有备份"""
     try:
-        backup_manager = BackupManager()
+        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
         backups = backup_manager.list_backups()
         return {
             "total": len(backups),
@@ -70,7 +70,7 @@ async def create_backup(
 ):
     """创建备份"""
     try:
-        backup_manager = BackupManager()
+        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
         result = backup_manager.create_backup(
             db,
             include_data=request.include_data,
@@ -109,7 +109,7 @@ async def restore_backup(
 ):
     """恢复备份"""
     try:
-        backup_manager = BackupManager()
+        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
         result = backup_manager.restore_backup(
             db,
             filename=request.filename,
@@ -183,7 +183,7 @@ async def delete_backup(
 ):
     """删除备份文件"""
     try:
-        backup_manager = BackupManager()
+        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
         result = backup_manager.delete_backup(filename)
         
         if not result["success"]:
@@ -211,7 +211,7 @@ async def cleanup_old_backups(
 ):
     """清理旧备份（保留最近 N 天）"""
     try:
-        backup_manager = BackupManager()
+        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
         result = backup_manager.cleanup_old_backups(days)
         
         return {
