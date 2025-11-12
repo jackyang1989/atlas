@@ -52,6 +52,7 @@ app.add_middleware(
 
 app.include_router(health.router, tags=["Health"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(services.router, prefix="/api/services", tags=["Services"])
 
 
 if __name__ == "__main__":
