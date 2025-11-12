@@ -9,6 +9,7 @@ import MainLayout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Services from './pages/Services';
+import Users from './pages/Users';
 
 import './App.css';
 
@@ -63,6 +64,7 @@ function App() {
         >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/users" element={<Users />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
 
