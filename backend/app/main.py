@@ -18,7 +18,7 @@ from app.api import auth, health, services, users, monitor, domains, components,
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 启动事件
+    # ==================== 启动事件 ====================
     logger.info("🚀 ATLAS 启动中...")
     
     # 1. 创建数据库表
@@ -38,11 +38,22 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
     
+    # 4. 注册和启动定时任务
+    from app.tasks.scheduled_tasks import register_scheduled_tasks, start_scheduler
+    db_factory = SessionLocal
+    register_scheduled_tasks(db_factory)
+    start_scheduler()
+    logger.info("✅ 定时任务已启动")
+    
     logger.info("✅ 应用启动完成")
     yield
     
-    # 关闭事件
+    # ==================== 关闭事件 ====================
     logger.info("👋 ATLAS 关闭中...")
+    
+    from app.tasks.scheduled_tasks import stop_scheduler
+    stop_scheduler()
+    logger.info("✅ 定时任务已停止")
 
 
 app = FastAPI(
@@ -98,6 +109,13 @@ async def health_check():
         "status": "ok",
         "service": "atlas"
     }
+
+
+@app.get("/api/tasks/status")
+async def get_tasks_status():
+    """获取定时任务状态（仅用于调试）"""
+    from app.tasks.scheduled_tasks import get_scheduler_status
+    return get_scheduler_status()
 
 
 if __name__ == "__main__":
