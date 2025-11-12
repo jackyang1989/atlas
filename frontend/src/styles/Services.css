@@ -1,0 +1,12 @@
+.services-container {
+  min-height: 100%;
+}
+
+.services-container .ant-table {
+  background: white;
+  border-radius: 8px;
+}
+
+.services-container .ant-modal {
+  border-radius: 8px;
+}
