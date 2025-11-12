@@ -10,3 +10,20 @@
 .services-container .ant-modal {
   border-radius: 8px;
 }
+
+.services-container .ant-table-thead > tr > th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.services-container .ant-table-body > tr:hover > td {
+  background: #f5f5f5;
+}
+
+.status-running {
+  color: #52c41a;
+}
+
+.status-stopped {
+  color: #f5222d;
+}
