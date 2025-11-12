@@ -5,18 +5,16 @@ import {
   UserOutlined,
   GlobeOutlined,
   ToolOutlined,
+  DatabaseOutlined,
   SettingOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { useState } from 'react';
 import '../styles/Layout.css';
 
 export default function MainLayout({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
 
   const menuItems = [
     { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
@@ -24,22 +22,16 @@ export default function MainLayout({ user, onLogout }) {
     { key: '/users', icon: <UserOutlined />, label: '用户管理' },
     { key: '/domains', icon: <GlobeOutlined />, label: '域名证书' },
     { key: '/components', icon: <ToolOutlined />, label: '组件中心' },
+    { key: '/backups', icon: <DatabaseOutlined />, label: '备份管理' },
     { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
   ];
 
   const userMenuItems = [
     {
-      label: '修改密码',
-      key: 'change-password',
-      onClick: () => navigate('/change-password'),
-    },
-    {
-      type: 'divider',
-    },
-    {
       label: '退出登录',
       key: 'logout',
       danger: true,
+      icon: <LogoutOutlined />,
       onClick: onLogout,
     },
   ];
@@ -47,9 +39,6 @@ export default function MainLayout({ user, onLogout }) {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Layout.Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
         width={200}
         theme="dark"
         style={{
@@ -62,7 +51,8 @@ export default function MainLayout({ user, onLogout }) {
         }}
       >
         <div className="logo">
-          <h1>{collapsed ? 'A' : 'ATLAS'}</h1>
+          <h1>ATLAS</h1>
+          <p style={{ fontSize: 10, color: '#888', margin: 0 }}>v1.0.0</p>
         </div>
         <Menu
           theme="dark"
@@ -73,7 +63,7 @@ export default function MainLayout({ user, onLogout }) {
         />
       </Layout.Sider>
 
-      <Layout style={{ marginLeft: collapsed ? 80 : 200 }}>
+      <Layout style={{ marginLeft: 200 }}>
         <Layout.Header
           style={{
             background: '#fff',
@@ -84,15 +74,7 @@ export default function MainLayout({ user, onLogout }) {
             alignItems: 'center',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span
-              className="layout-trigger"
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            </span>
-            <h2 style={{ margin: 0, marginLeft: 16 }}>ATLAS 管理面板</h2>
-          </div>
+          <h2 style={{ margin: 0 }}>ATLAS 管理面板</h2>
           <Dropdown menu={{ items: userMenuItems }}>
             <Space style={{ cursor: 'pointer' }}>
               <Avatar icon={<UserOutlined />} />
@@ -106,7 +88,7 @@ export default function MainLayout({ user, onLogout }) {
         </Layout.Content>
 
         <Layout.Footer style={{ textAlign: 'center', color: '#999' }}>
-          ATLAS ©2025. 企业级基础设施管理面板
+          ATLAS ©2025. Advanced Traffic & Load Administration System
         </Layout.Footer>
       </Layout>
     </Layout>
