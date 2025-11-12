@@ -7,20 +7,23 @@ import logging
 from app.config import settings
 from app.database import engine, Base, SessionLocal
 from app import models
-from app.api import auth, health, services
-from app.services.auth_service import AuthService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# 导入路由
+from app.api import auth, health, services
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 启动
+    # 启动事件
     logger.info("🚀 ATLAS 启动中...")
     Base.metadata.create_all(bind=engine)
     logger.info("✅ 数据库初始化完成")
     
+    # 创建默认管理员
+    from app.services.auth_service import AuthService
     db = SessionLocal()
     try:
         AuthService.create_default_admin(db)
@@ -29,7 +32,7 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    # 关闭
+    # 关闭事件
     logger.info("👋 ATLAS 关闭")
 
 
@@ -42,6 +45,7 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+# CORS 配置
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost"],
@@ -50,10 +54,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 路由注册
 app.include_router(health.router, tags=["Health"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(services.router, prefix="/api/services", tags=["Services"])
 
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=5000, reload=settings.DEBUG)
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=5000,
+        reload=settings.DEBUG,
+    )
