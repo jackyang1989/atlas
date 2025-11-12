@@ -10,6 +10,10 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Services from './pages/Services';
 import Users from './pages/Users';
+import Domains from './pages/Domains';
+import Components from './pages/Components';
+import Backups from './pages/Backups';
+import Settings from './pages/Settings';
 
 import './App.css';
 
@@ -65,6 +69,10 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/services" element={<Services />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/domains" element={<Domains />} />
+          <Route path="/components" element={<Components />} />
+          <Route path="/backups" element={<Backups />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
 
