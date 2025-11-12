@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthCredentials
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -13,7 +13,7 @@ from app.schemas.component import (
     BackupListResponse,
     BackupRestoreRequest
 )
-from app.services.backup_manager import BackupManager
+from app.services.backup_service import get_backup_service  # ✅ 修复：导入正确的服务
 from app.utils.security import verify_token
 from app.config import settings
 
@@ -48,8 +48,8 @@ async def list_backups(
 ):
     """列出所有备份"""
     try:
-        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
-        backups = backup_manager.list_backups()
+        backup_service = get_backup_service()  # ✅ 修复：正确获取实例
+        backups = backup_service.list_backups()
         return {
             "total": len(backups),
             "items": backups
@@ -70,15 +70,15 @@ async def create_backup(
 ):
     """创建备份"""
     try:
-        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
-        result = backup_manager.create_backup(
+        backup_service = get_backup_service()  # ✅ 修复：正确获取实例
+        result = backup_service.create_backup(
             db,
             include_data=request.include_data,
             include_config=request.include_config,
             description=request.description
         )
         
-        if not result["success"]:
+        if not result.get("success"):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=result.get("error", "创建备份失败")
@@ -101,7 +101,7 @@ async def create_backup(
         )
 
 
-@router.post("/restore")
+@router.post("/restore", status_code=status.HTTP_200_OK)
 async def restore_backup(
     request: BackupRestoreRequest,
     current_user: str = Depends(get_current_user),
@@ -109,14 +109,14 @@ async def restore_backup(
 ):
     """恢复备份"""
     try:
-        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
-        result = backup_manager.restore_backup(
+        backup_service = get_backup_service()  # ✅ 修复：正确获取实例
+        result = backup_service.restore_backup(
             db,
             filename=request.filename,
             force=request.force
         )
         
-        if not result["success"]:
+        if not result.get("success"):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=result.get("error", "恢复备份失败")
@@ -153,7 +153,7 @@ async def download_backup(
                 detail="备份文件不存在"
             )
         
-        # 安全检查：确保文件在备份目录内
+        # ✅ 安全检查：确保文件在备份目录内
         if not os.path.abspath(filepath).startswith(os.path.abspath(backup_dir)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -183,13 +183,13 @@ async def delete_backup(
 ):
     """删除备份文件"""
     try:
-        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
-        result = backup_manager.delete_backup(filename)
+        backup_service = get_backup_service()  # ✅ 修复：正确获取实例
+        success = backup_service.delete_backup(filename)
         
-        if not result["success"]:
+        if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=result.get("error", "备份文件不存在")
+                detail="备份文件不存在"
             )
         
         return None
@@ -206,20 +206,28 @@ async def delete_backup(
 
 @router.post("/cleanup")
 async def cleanup_old_backups(
-    days: int = 30,
+    days: int = Query(30, ge=1, le=365, description="保留天数"),
     current_user: str = Depends(get_current_user)
 ):
     """清理旧备份（保留最近 N 天）"""
     try:
-        backups = BackupManager.list_backups(settings.BACKUPS_DIR)
-        result = backup_manager.cleanup_old_backups(days)
+        backup_service = get_backup_service()  # ✅ 修复：正确获取实例
+        result = backup_service.cleanup_old_backups(days)
+        
+        if not result.get("success"):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=result.get("error", "清理失败")
+            )
         
         return {
-            "message": f"已删除 {result['deleted_count']} 个过期备份",
+            "message": result["message"],
             "deleted_count": result["deleted_count"],
             "freed_space_mb": result.get("freed_space_mb", 0)
         }
     
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"清理备份失败: {e}")
         raise HTTPException(
