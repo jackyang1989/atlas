@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 class ServiceBase(BaseModel):
+    """服务基础字段"""
     name: str = Field(..., min_length=1, max_length=100, description="服务名称")
     protocol: str = Field(..., description="协议类型")
     port: int = Field(..., ge=1, le=65535, description="监听端口")
