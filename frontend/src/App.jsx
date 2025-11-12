@@ -4,11 +4,11 @@ import { Spin } from 'antd';
 import { authAPI } from './services/api';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import MainLayout from './components/Layout';
-import Services from './pages/Services';
 
 // 页面组件
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Services from './pages/Services';
 
 import './App.css';
 
@@ -62,7 +62,7 @@ function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/services" element={<Services />} />  {/* 添加这一行 */}
+          <Route path="/services" element={<Services />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>
 
