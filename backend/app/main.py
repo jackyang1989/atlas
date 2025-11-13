@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 # 导入所有路由
 from app.api import auth, health, services, users, monitor, domains, components, backups, alerts
-from app.api import rbac  # ✨ 新增：导入 RBAC 路由
+from app.api import rbac  # ✨ RBAC 路由
+from app.api import webhooks  # ✨ Webhook 路由
 
 
 @asynccontextmanager
@@ -90,10 +91,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 注册路由
+# ==================== 注册路由 ====================
 app.include_router(health.router, tags=["Health"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(rbac.router, prefix="/api/rbac", tags=["RBAC"])  # ✨ 新增：RBAC 路由
+app.include_router(rbac.router, prefix="/api/rbac", tags=["RBAC"])  # ✨ RBAC 权限管理
+app.include_router(webhooks.router, prefix="/api/webhooks", tags=["Webhooks"])  # ✨ Webhook 事件系统
 app.include_router(services.router, prefix="/api/services", tags=["Services"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(monitor.router, prefix="/api/monitor", tags=["Monitor"])
